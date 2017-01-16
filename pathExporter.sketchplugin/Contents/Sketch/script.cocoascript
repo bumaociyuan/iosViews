@@ -162,7 +162,7 @@ var extractFill = function(styleFill) {
   var color = styleFill.color();
   var fillType = styleFill.fillType();
   if(fillType == 0) {
-    return ["l.fillColor = UIColor(hue: " + Lib.toFixed(color.hue(), 2) +", saturation: " + Lib.toFixed(color.saturation(), 2) + ", brightness: " + Lib.toFixed(color.brightness(), 2) + ", alpha: " + Lib.toFixed(color.alpha(), 2) + ").CGColor"]
+    return ["l.fillColor = UIColor(hue: " + Lib.toFixed(color.hue(), 2) +", saturation: " + Lib.toFixed(color.saturation(), 2) + ", brightness: " + Lib.toFixed(color.brightness(), 2) + ", alpha: " + Lib.toFixed(color.alpha(), 2) + ").cgColor"]
   } else if(fillType == 1 && styleFill.gradient().gradientType() == 0) {
     var gradientStops = styleFill.gradient().stops()
     var colorsArr = []
@@ -171,7 +171,7 @@ var extractFill = function(styleFill) {
       var stop = gradientStops.objectAtIndex(i)
       var color = stop.color()
       locationsArr.push("NSNumber(float: " + Lib.toFixed(stop.position(), 2) + ")")
-      colorsArr.push("UIColor(hue: " + Lib.toFixed(color.hue(), 2) +", saturation: " + Lib.toFixed(color.saturation(), 2) + ", brightness: " + Lib.toFixed(color.brightness(), 2) + ", alpha: " + Lib.toFixed(color.alpha(), 2) + ").CGColor")
+      colorsArr.push("UIColor(hue: " + Lib.toFixed(color.hue(), 2) +", saturation: " + Lib.toFixed(color.saturation(), 2) + ", brightness: " + Lib.toFixed(color.brightness(), 2) + ", alpha: " + Lib.toFixed(color.alpha(), 2) + ").cgColor")
     }
 
     var from = styleFill.gradient().from()
@@ -206,7 +206,7 @@ var extractStroke = function(style) {
         array.push("l.lineDashPattern = [" + dashPattern + "]")
         array.push("l.lineJoin = " + ["kCALineJoinMiter", "kCALineJoinRound", "kCALineJoinBevel"][lineJoin])
         array.push("l.lineCap = " + ["kCALineCapButt", "kCALineCapRound", "kCALineCapSquare"][lineCap])
-        array.push("l.strokeColor = UIColor(hue: " + Lib.toFixed(color.hue(), 2) +", saturation: " + Lib.toFixed(color.saturation(), 2) + ", brightness: " + Lib.toFixed(color.brightness(), 2) + ", alpha: " + Lib.toFixed(color.alpha(), 2) + ").CGColor")
+        array.push("l.strokeColor = UIColor(hue: " + Lib.toFixed(color.hue(), 2) +", saturation: " + Lib.toFixed(color.saturation(), 2) + ", brightness: " + Lib.toFixed(color.brightness(), 2) + ", alpha: " + Lib.toFixed(color.alpha(), 2) + ").cgColor")
       }
     }
   }
@@ -227,10 +227,10 @@ var processShapePath = function(anything, boundsRect) {
     for(var i = 0; i < pointsCount; i++) { addPoint(swiftCode, layer, path, i, i == 0); }
     if(path.isClosed()) {
       addPoint(swiftCode, layer, path, 0, false);
-      swiftCode.push("path.closePath()");
+      swiftCode.push("path.close()");
     }
   }
-  swiftCode.push("return path.CGPath");
+  swiftCode.push("return path.cgPath");
 
   return swiftCode
 }
@@ -251,15 +251,15 @@ var addPoint = function(acc, layer, path, index, isFirst) {
     if(prevPoint.hasCurveFrom()) { prev_abs_pointFrom = layer.absolutePoint(prevPoint.curveFrom()); }
   }
 
-  if(index == 0 && isFirst) { acc.push("path.moveToPoint("+relPointOffset(abs_point, offsetX, offsetY)+")") }
+  if(index == 0 && isFirst) { acc.push("path.move(to: "+relPointOffset(abs_point, offsetX, offsetY)+")") }
   else if(prev_abs_pointFrom && abs_pointTo) {
-    acc.push("path.addCurveToPoint("+relPointOffset(abs_point, offsetX, offsetY)+", controlPoint1: "+relPointOffset(prev_abs_pointFrom, offsetX, offsetY)+", controlPoint2:"+relPointOffset(abs_pointTo, offsetX, offsetY)+")")
+    acc.push("path.addCurve(to: "+relPointOffset(abs_point, offsetX, offsetY)+", controlPoint1: "+relPointOffset(prev_abs_pointFrom, offsetX, offsetY)+", controlPoint2:"+relPointOffset(abs_pointTo, offsetX, offsetY)+")")
   } else if(prev_abs_pointFrom || abs_pointTo) {
     var controlPoint = prev_abs_pointFrom || abs_pointTo
-    acc.push("path.addQuadCurveToPoint("+relPointOffset(abs_point, offsetX, offsetY)+", controlPoint: "+relPointOffset(controlPoint, offsetX, offsetY)+")")
+    acc.push("path.addQuadCurve(to: "+relPointOffset(abs_point, offsetX, offsetY)+", controlPoint: "+relPointOffset(controlPoint, offsetX, offsetY)+")")
   }
   else {
-    acc.push("path.addLineToPoint("+relPointOffset(abs_point, offsetX, offsetY)+")")
+    acc.push("path.addLine(to: "+relPointOffset(abs_point, offsetX, offsetY)+")")
   }
 }
 
